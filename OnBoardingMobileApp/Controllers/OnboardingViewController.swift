@@ -8,39 +8,19 @@
 import UIKit
 
 class OnboardingViewController: UIViewController {
-
-    private let backgroundImage: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.image = UIImage(named: "Onboarding BG")
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
     
-    private let contentImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(named: "Work In Beanbag")
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private let headerLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.font = UIFont(name: "Poppins-Bold", size: 28)
-        label.textColor = UIColor(named: "Heading")
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let subheaderLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.font = UIFont(name: "Poppins-Regular", size: 14)
-        label.textColor = UIColor(named: "Subheading")
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.bounces = false
+        
+        collectionView.register(OnboardingCollectionViewCell.self, forCellWithReuseIdentifier: OnboardingCollectionViewCell.identifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
     }()
     
     private let skipButton: UIButton = {
@@ -70,13 +50,16 @@ class OnboardingViewController: UIViewController {
     
     private var selectedViewIndex = 0
     
+    /// Contains `Tuple(String, String)`
+    /// 1 - Header text
+    /// 2 - Subheader text
     private let onboardingTexts = [
         ("Let's Get Started", "Our goal is to ensure that you have everything you need to feel comfortable, confident, and ready to make an impact."),
         ("Your Onboarding Journey Begins!", "Our goal is to ensure that you have everything you need to feel comfortable, confident, and ready to make an impact."),
         ("Your First Steps to Success", "Our goal is to ensure that you have everything you need to feel comfortable, confident, and ready to make an impact.")
     ]
     
-    private lazy var onboardingImagesName = [
+    private let onboardingImagesName = [
         "Work In Beanbag",
         "Work In Desk",
         "Thumb Up"
@@ -85,18 +68,21 @@ class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemBackground
-        view.addSubview(backgroundImage)
-        view.addSubview(contentImageView)
-        view.addSubview(headerLabel)
-        view.addSubview(subheaderLabel)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        
+        view.backgroundColor = .white
+        
+        view.addSubview(collectionView)
         view.addSubview(skipButton)
         view.addSubview(nextButton)
         
         setupLineViews()
-        setupOnboardingText()
-        setupOnboardingImage()
         setupButtonAction()
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .darkContent
     }
     
     override func viewDidLayoutSubviews() {
@@ -109,46 +95,21 @@ class OnboardingViewController: UIViewController {
         
         let safeArea = view.safeAreaInsets
         
-        // Image background
         NSLayoutConstraint.activate([
-            backgroundImage.topAnchor.constraint(equalTo: view.topAnchor, constant: safeArea.top + 10),
-            backgroundImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundImage.heightAnchor.constraint(equalTo: view.widthAnchor)
-        ])
-        
-        // Content image
-        NSLayoutConstraint.activate([
-            contentImageView.widthAnchor.constraint(equalTo: backgroundImage.widthAnchor, multiplier: 0.8),
-            contentImageView.heightAnchor.constraint(equalTo: backgroundImage.heightAnchor, multiplier: 0.8),
-            contentImageView.bottomAnchor.constraint(equalTo: backgroundImage.bottomAnchor, constant: 60),
-            contentImageView.trailingAnchor.constraint(equalTo: backgroundImage.trailingAnchor, constant: 45)
-        ])
-        
-        // Header label
-        NSLayoutConstraint.activate([
-            headerLabel.topAnchor.constraint(equalTo: backgroundImage.bottomAnchor, constant: 60),
-            headerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 41),
-            headerLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -41)
-        ])
-        
-        // Subheader label
-        NSLayoutConstraint.activate([
-            subheaderLabel.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 12),
-            subheaderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 41),
-            subheaderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -41)
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: safeArea.top),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: linesView[0].topAnchor, constant: -60)
         ])
         
         // Lines view
         for lineIndex in 0..<linesView.count {
-            
             // Line height
             NSLayoutConstraint.activate([
                 linesView[lineIndex].widthAnchor.constraint(equalToConstant: 50),
                 linesView[lineIndex].heightAnchor.constraint(equalToConstant: 6)
             ])
-            
-            // First item
+            // First line
             if lineIndex == 0 {
                 NSLayoutConstraint.activate([
                     linesView[lineIndex].leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 41),
@@ -156,7 +117,7 @@ class OnboardingViewController: UIViewController {
                 ])
                 continue
             }
-            // Rest of the items
+            // Rest of the lines
             NSLayoutConstraint.activate([
                 linesView[lineIndex].leadingAnchor.constraint(equalTo: linesView[lineIndex - 1].trailingAnchor, constant: 8),
                 linesView[lineIndex].centerYAnchor.constraint(equalTo: linesView[lineIndex - 1].centerYAnchor)
@@ -179,22 +140,12 @@ class OnboardingViewController: UIViewController {
     }
     
     private func setupButtonAction() {
+        
         // Skip button
         skipButton.addTarget(self, action: #selector(previousButtonPressed), for: .touchUpInside)
         
         // Next button
         nextButton.addTarget(self, action: #selector(nextButtonPressed), for: .touchUpInside)
-    }
-    
-    private func setupOnboardingText() {
-        headerLabel.text = onboardingTexts[selectedViewIndex].0
-        subheaderLabel.text = onboardingTexts[selectedViewIndex].1
-    }
-    
-    private func setupOnboardingImage() {
-        if let onboardingImage = UIImage(named: onboardingImagesName[selectedViewIndex]) {
-            contentImageView.image = onboardingImage
-        }
     }
     
     private func setupLineViews() {
@@ -212,34 +163,110 @@ class OnboardingViewController: UIViewController {
     private func setSelectedLine(index: Int) {
         for lineIndex in 0..<linesView.count {
             let lineColorName = lineIndex == selectedViewIndex ? "PrimaryBlack" : "PrimaryGrey"
-            
             linesView[lineIndex].backgroundColor = UIColor(named: lineColorName)
         }
     }
     
     @objc private func nextButtonPressed() {
-        selectedViewIndex += 1
+        var selectedIndex = selectedViewIndex + 1
         
-        if selectedViewIndex >= linesView.count {
-            selectedViewIndex -= 1
+        if selectedIndex >= linesView.count {
+            selectedIndex -= 1
         }
         
-        setSelectedLine(index: selectedViewIndex)
-        
-        setupOnboardingText()
-        setupOnboardingImage()
+        // Prevent selecting the same item multiple times, causing jittery when spamming next button
+        if selectedIndex != selectedViewIndex {
+            selectedViewIndex = selectedIndex
+            setSelectedLine(index: selectedViewIndex)
+            collectionView.selectItem(
+                at: IndexPath(item: selectedViewIndex, section: 0),
+                animated: true,
+                scrollPosition: .centeredHorizontally)
+        }
     }
     
     @objc private func previousButtonPressed() {
-        selectedViewIndex -= 1
+        var selectedIndex = selectedViewIndex - 1
         
-        if selectedViewIndex < 0 {
-            selectedViewIndex += 1
+        if selectedIndex < 0 {
+            selectedIndex += 1
+        }
+        
+        // Prevent selecting the same item multiple times, causing jittery when spamming previous button
+        if selectedIndex != selectedViewIndex {
+            selectedViewIndex = selectedIndex
+            setSelectedLine(index: selectedViewIndex)
+            collectionView.selectItem(
+                at: IndexPath(item: selectedViewIndex, section: 0),
+                animated: true,
+                scrollPosition: .centeredHorizontally)
+        }
+    }
+    
+    // Snap cell on finished swiping
+    private func setSelectedCellOnEndSwipe(scrollViewOffset: CGFloat, cellWidth: CGFloat) {
+        
+        if scrollViewOffset > cellWidth * 1.5 {
+            selectedViewIndex = 2
+        } else if scrollViewOffset > cellWidth * 0.5 {
+            selectedViewIndex = 1
+        } else {
+            selectedViewIndex = 0
         }
         
         setSelectedLine(index: selectedViewIndex)
+        collectionView.selectItem(
+            at: IndexPath(item: selectedViewIndex, section: 0),
+            animated: true,
+            scrollPosition: .centeredHorizontally)
+    }
+}
+
+extension OnboardingViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        onboardingImagesName.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OnboardingCollectionViewCell.identifier, for: indexPath) as? OnboardingCollectionViewCell else {
+            return UICollectionViewCell()
+        }
         
-        setupOnboardingText()
-        setupOnboardingImage()
+        if let image = UIImage(named: onboardingImagesName[indexPath.row]) {
+            cell.configureImage(image: image)
+        }
+        
+        cell.configureHeaderLabel(with: onboardingTexts[indexPath.row].0)
+        cell.configureSubheaderLabel(with: onboardingTexts[indexPath.row].1)
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let numOfColum = CGFloat(1)
+        let collectionViewFlowLayout = collectionViewLayout as! UICollectionViewFlowLayout
+        let spacing = (collectionViewFlowLayout.minimumInteritemSpacing * CGFloat(numOfColum - 1)) + collectionViewFlowLayout.sectionInset.left + collectionViewFlowLayout.sectionInset.right
+        let width = (collectionView.frame.size.width / numOfColum ) - spacing
+        
+        return CGSize(width: width, height: collectionView.bounds.height)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    // Snap cell on will begin decelerating
+    func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        let itemWidth = collectionView.bounds.width
+        let offset = scrollView.contentOffset.x
+        setSelectedCellOnEndSwipe(scrollViewOffset: offset, cellWidth: itemWidth)
+    }
+    
+    // Snap cell on will end dragging
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let itemWidth = collectionView.bounds.width
+        let offset = scrollView.contentOffset.x
+        setSelectedCellOnEndSwipe(scrollViewOffset: offset, cellWidth: itemWidth)
     }
 }
