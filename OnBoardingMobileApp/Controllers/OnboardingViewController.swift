@@ -175,14 +175,14 @@ class OnboardingViewController: UIViewController {
         }
         
         // Prevent selecting the same item multiple times, causing jittery when spamming next button
-        if selectedIndex != selectedViewIndex {
-            selectedViewIndex = selectedIndex
-            setSelectedLine(index: selectedViewIndex)
-            collectionView.selectItem(
-                at: IndexPath(item: selectedViewIndex, section: 0),
-                animated: true,
-                scrollPosition: .centeredHorizontally)
-        }
+        if selectedIndex == selectedViewIndex { return }
+        
+        selectedViewIndex = selectedIndex
+        setSelectedLine(index: selectedViewIndex)
+        collectionView.selectItem(
+            at: IndexPath(item: selectedViewIndex, section: 0),
+            animated: true,
+            scrollPosition: .centeredHorizontally)
     }
     
     @objc private func previousButtonPressed() {
@@ -193,14 +193,14 @@ class OnboardingViewController: UIViewController {
         }
         
         // Prevent selecting the same item multiple times, causing jittery when spamming previous button
-        if selectedIndex != selectedViewIndex {
-            selectedViewIndex = selectedIndex
-            setSelectedLine(index: selectedViewIndex)
-            collectionView.selectItem(
-                at: IndexPath(item: selectedViewIndex, section: 0),
-                animated: true,
-                scrollPosition: .centeredHorizontally)
-        }
+        if selectedIndex == selectedViewIndex { return }
+        
+        selectedViewIndex = selectedIndex
+        setSelectedLine(index: selectedViewIndex)
+        collectionView.selectItem(
+            at: IndexPath(item: selectedViewIndex, section: 0),
+            animated: true,
+            scrollPosition: .centeredHorizontally)
     }
     
     // Snap cell on finished swiping
