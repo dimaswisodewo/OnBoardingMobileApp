@@ -27,6 +27,14 @@ class OnboardingCollectionViewCell: UICollectionViewCell {
         return imageView
     }()
     
+    private let secondaryContentImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.image = UIImage(named: "Work In Beanbag")
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
@@ -52,6 +60,7 @@ class OnboardingCollectionViewCell: UICollectionViewCell {
         
         contentView.addSubview(backgroundImage)
         contentView.addSubview(contentImageView)
+        contentView.addSubview(secondaryContentImageView)
         contentView.addSubview(headerLabel)
         contentView.addSubview(subheaderLabel)
         
@@ -82,6 +91,14 @@ class OnboardingCollectionViewCell: UICollectionViewCell {
             contentImageView.trailingAnchor.constraint(equalTo: backgroundImage.trailingAnchor)
         ])
         
+        // Secondary content image
+        NSLayoutConstraint.activate([
+            secondaryContentImageView.widthAnchor.constraint(equalTo: backgroundImage.widthAnchor, multiplier: 0.42),
+            secondaryContentImageView.heightAnchor.constraint(equalTo: backgroundImage.heightAnchor, multiplier: 0.42),
+            secondaryContentImageView.topAnchor.constraint(equalTo: backgroundImage.topAnchor, constant: -70),
+            secondaryContentImageView.leadingAnchor.constraint(equalTo: backgroundImage.leadingAnchor, constant: 40)
+        ])
+        
         // Header label
         NSLayoutConstraint.activate([
             headerLabel.topAnchor.constraint(equalTo: backgroundImage.bottomAnchor, constant: 60),
@@ -99,6 +116,10 @@ class OnboardingCollectionViewCell: UICollectionViewCell {
     
     func configureImage(image: UIImage) {
         contentImageView.image = image
+    }
+    
+    func configureSecondaryImage(image: UIImage?) {
+        secondaryContentImageView.image = image
     }
     
     func configureHeaderLabel(with headerText: String) {

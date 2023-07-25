@@ -237,6 +237,12 @@ extension OnboardingViewController: UICollectionViewDelegateFlowLayout, UICollec
             cell.configureImage(image: image)
         }
         
+        if indexPath.row == 0, let image = UIImage(named: "Lamp") {
+            cell.configureSecondaryImage(image: image)
+        } else {
+            cell.configureSecondaryImage(image: nil)
+        }
+        
         cell.configureHeaderLabel(with: onboardingTexts[indexPath.row].0)
         cell.configureSubheaderLabel(with: onboardingTexts[indexPath.row].1)
         
