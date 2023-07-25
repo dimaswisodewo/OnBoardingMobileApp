@@ -96,7 +96,7 @@ class OnboardingViewController: UIViewController {
         let safeArea = view.safeAreaInsets
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: safeArea.top),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: linesView[0].topAnchor, constant: -60)

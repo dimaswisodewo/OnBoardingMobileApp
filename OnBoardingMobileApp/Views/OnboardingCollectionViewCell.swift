@@ -77,7 +77,7 @@ class OnboardingCollectionViewCell: UICollectionViewCell {
         
         // Image background
         NSLayoutConstraint.activate([
-            backgroundImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: safeArea.top + 10),
+            backgroundImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: safeArea.top + 42),
             backgroundImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             backgroundImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             backgroundImage.heightAnchor.constraint(equalTo: contentView.widthAnchor)
